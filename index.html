@@ -6,18 +6,12 @@ THIS IS JUST TO AVOID CONFUSION AS TO SOME OF THE PATHS.
 BUT, MINOR TWEAKS MAY STILL BE NEEDED.
 
 STILL TO DO:
-HIGHLIGHT A TEAM ON ALL GRAPHS ON MOUSEOVER
-TEAM EXCLUSION LIST, PREFEREABLY DYNAMICALLY
+DONUT GRAPH WHEN A TEAM IS HIGLIGHTED
 -->
 
 <html>
 <head>
-	<style type="text/css">
-		.chart rect {
-			stroke: white;
-			fill: steelblue;
-		}
-	</style>
+	<script type="text/javascript" src="/D3/data.js"></script>
 	<script type="text/javascript" src="/D3/d3.v3.min.js"></script>
 	<title>D3 Display</title>
 </head>
@@ -25,35 +19,45 @@ TEAM EXCLUSION LIST, PREFEREABLY DYNAMICALLY
 <table><tr><td id="viz0"></td><td id="viz1"></td></tr><tr><td id="viz2"></td><td id="viz3"></td></tr></table>
 
 <script type="text/javascript">
-var q;
 var qualmax = 0;
 var qpmax = 0;
 var pointmax = 0;
 
-var datasize;
-
-d3.json("/D3/data.js", function(error, json){
-	if (error) return console.warn(error);
-	datasize = json.length;
-
-	q = json;
+var qsize = teamq.length;
+var qpsize = teamqp.length;
+var psize = teamp.length;
 
 var w = 600;
 var h = 340;
 
-	q.sort(function(a,b){
-		if (a[2] > qualmax) qualmax = a[2];
-		if (b[2] > qualmax) qualmax = b[2];
+var synchronizedMouseOver = function(d, i) {
+	d3.selectAll(".a" + d[0].toString())
+		.style("fill", "maroon");
+};
 
+var synchronizedMouseOut = function(d, i) {
+	d3.selectAll(".a" + d[0].toString())
+		.style("fill", "steelblue");
+};
+
+var synchronizedMouseClick = function(d, i) {
+	d3.selectAll(".a" + d[0].toString()).remove();
+	d3.selectAll(".b" + d[0].toString()).remove();
+};
+
+teamq.sort(function(a,b){
+	if (a[1] > qualmax) qualmax = a[1];
+	if (b[1] > qualmax) qualmax = b[1];
+
+	if (a[1] > b[1]) return -1;
+	if (a[1] < b[1]) return 1;
+	if (a[1] == b[1]){
 		if (a[2] > b[2]) return -1;
 		if (a[2] < b[2]) return 1;
-		if (a[2] == b[2]){
-			if (a[3] > b[3]) return -1;
-			if (a[3] < b[3]) return 1;
-		} else {
-			return 0;
-		}
-	});
+	} else {
+		return 0;
+	}
+});
 
 var graph1 = d3.select("#viz1").append("svg")
 	.attr("class", "chart")
@@ -61,32 +65,39 @@ var graph1 = d3.select("#viz1").append("svg")
 	.attr("height", h);
 
 graph1.selectAll("rect")
-	.data(q)
+	.data(teamq)
 	.enter().append("rect")
-	.attr("x", function(d,i){ return i*w/datasize; })
-	.attr("y", function(d){ return h-(d[2]/qualmax*h); })
-	.attr("width", w/datasize)
-	.attr("height", function(d){ return (d[2]/qualmax*h); });
+		.attr("x", function(d,i){ return i*w/qsize; })
+		.attr("y", function(d){ return h-(d[1]/qualmax*h); })
+		.on("mouseover", synchronizedMouseOver)
+		.on("mouseout", synchronizedMouseOut)
+		.on("click", synchronizedMouseClick)
+		.attr("width", w/qsize)
+		.attr("height", function(d){ return (d[1]/qualmax*h); })
+		.style("fill", "steelblue")
+		.style("stroke", "white")
+		.attr("class", function(d, i){ return "a" + d[0].toString(); });
 graph1.selectAll("text")
-	.data(q)
+	.data(teamq)
 	.enter().append("text")
-	.text(function(d){ return d[0]; })
-	.attr("text-anchor", "end")
-	.attr("transform", function(d,i){ return "translate("+(i*w/datasize+12).toString()+","+(h-(d[2]/qualmax*h)+3).toString()+")rotate(-90)"; });
+		.text(function(d){ return d[0]; })
+		.attr("text-anchor", "end")
+		.attr("transform", function(d,i){ return "translate("+(i*w/qsize+12).toString()+","+(h-(d[1]/qualmax*h)+3).toString()+")rotate(-90)"; })
+		.attr("class", function(d, i){ return "b" + d[0].toString(); });
 
-	q.sort(function(a,b){
-		if (a[2] > qpmax) qpmax = a[2];
-		if (b[2] > qpmax) qpmax = b[2];
+teamqp.sort(function(a,b){
+	if (a[2] > qpmax) qpmax = a[2];
+	if (b[2] > qpmax) qpmax = b[2];
 
-		if (a[2] > b[2]) return -1;
-		if (a[2] < b[2]) return 1;
-		if (a[2] == b[2]){
-			if (a[1] > b[1]) return -1;
-			if (a[1] < b[1]) return 1;
-		} else {
-			return 0;
-		}
-	});
+	if (a[2] > b[2]) return -1;
+	if (a[2] < b[2]) return 1;
+	if (a[2] == b[2]){
+		if (a[1] > b[1]) return -1;
+		if (a[1] < b[1]) return 1;
+	} else {
+		return 0;
+	}
+});
 
 var graph2 = d3.select("#viz2").append("svg")
 	.attr("class", "chart")
@@ -94,28 +105,35 @@ var graph2 = d3.select("#viz2").append("svg")
 	.attr("height", h);
 
 graph2.selectAll("rect")
-	.data(q)
-	.enter().append("rect")
-	.attr("x", function(d,i){ return i*w/datasize; })
-	.attr("y", function(d){ return h-(d[2]/qpmax*h); })
-	.attr("width", w/datasize)
-	.attr("height", function(d){ return (d[2]/qpmax*h); });
+	.data(teamqp)
+		.enter().append("rect")
+		.attr("x", function(d,i){ return i*w/qsize; })
+		.attr("y", function(d){ return h-(d[2]/qualmax*h); })
+		.on("mouseover", synchronizedMouseOver)
+		.on("mouseout", synchronizedMouseOut)
+		.on("click", synchronizedMouseClick)
+		.attr("width", w/qsize)
+		.attr("height", function(d){ return (d[2]/qualmax*h); })
+		.style("fill", "steelblue")
+		.style("stroke", "white")
+		.attr("class", function(d, i){ return "a" + d[0].toString(); });
 graph2.selectAll("text")
-	.data(q)
+	.data(teamqp)
 	.enter().append("text")
-	.text(function(d){ return d[0]; })
-	.attr("text-anchor", "end")
-	.attr("transform", function(d,i){ return "translate("+(i*w/datasize+12).toString()+","+(h-(d[2]/qpmax*h)+3).toString()+")rotate(-90)"; });
+		.text(function(d){ return d[0]; })
+		.attr("text-anchor", "end")
+		.attr("transform", function(d,i){ return "translate("+(i*w/qpsize+12).toString()+","+(h-(d[2]/qpmax*h)+3).toString()+")rotate(-90)"; })
+		.attr("class", function(d, i){ return "b" + d[0].toString(); });
 
 
-	q.sort(function(a,b){
-		if (a[1] > pointmax) pointmax = a[1];
-		if (b[1] > pointmax) pointmax = b[1];
+teamp.sort(function(a,b){
+	if (a[1] > pointmax) pointmax = a[1];
+	if (b[1] > pointmax) pointmax = b[1];
 
-		if (a[1] > b[1]) return -1;
-		if (a[1] < b[1]) return 1;
-		if (a[1] == b[1]) return 0;
-	});
+	if (a[1] > b[1]) return -1;
+	if (a[1] < b[1]) return 1;
+	if (a[1] == b[1]) return 0;
+});
 
 var graph3 = d3.select("#viz0").append("svg")
 	.attr("class", "chart")
@@ -123,20 +141,25 @@ var graph3 = d3.select("#viz0").append("svg")
 	.attr("height", h);
 
 graph3.selectAll("rect")
-	.data(q)
+	.data(teamp)
 	.enter().append("rect")
-	.attr("x", function(d,i){ return i*w/datasize; })
-	.attr("y", function(d){ return h-(d[1]/pointmax*h); })
-	.attr("width", w/datasize)
-	.attr("height", function(d){ return (d[1]/pointmax*h); });
+		.attr("x", function(d,i){ return i*w/qsize; })
+		.attr("y", function(d){ return h-(d[1]/pointmax*h); })
+		.on("mouseover", synchronizedMouseOver)
+		.on("mouseout", synchronizedMouseOut)
+		.on("click", synchronizedMouseClick)
+		.attr("width", w/qsize)
+		.attr("height", function(d){ return (d[1]/pointmax*h); })
+		.style("fill", "steelblue")
+		.style("stroke", "white")
+		.attr("class", function(d, i){ return "a" + d[0].toString(); });
 graph3.selectAll("text")
-	.data(q)
+	.data(teamp)
 	.enter().append("text")
-	.text(function(d){ return d[0]; })
-	.attr("text-anchor", "end")
-	.attr("transform", function(d,i){ return "translate("+(i*w/datasize+12).toString()+","+(h-(d[1]/pointmax*h)+3).toString()+")rotate(-90)"; });
-});
-
+		.text(function(d){ return d[0]; })
+		.attr("text-anchor", "end")
+		.attr("transform", function(d,i){ return "translate("+(i*w/psize+12).toString()+","+(h-(d[1]/pointmax*h)+3).toString()+")rotate(-90)"; })
+		.attr("class", function(d, i){ return "b" + d[0].toString(); });
 </script>
 </body>
 </html>
