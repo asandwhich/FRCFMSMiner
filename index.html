@@ -1,14 +1,3 @@
-<!--
-THIS PAGE EXPECTS TO FIND D3 AT docroot/D3/d3.d3.v3.min.js.
-IT ALSO EXPECTS THE DATA.JS FILE FROM THE PYTHON SCRIPT IN THE SAME PLACE.
-
-THIS IS JUST TO AVOID CONFUSION AS TO SOME OF THE PATHS.
-BUT, MINOR TWEAKS MAY STILL BE NEEDED.
-
-STILL TO DO:
-DONUT GRAPH WHEN A TEAM IS HIGLIGHTED
--->
-
 <html>
 <head>
 	<script type="text/javascript" src="/D3/data.js"></script>
@@ -124,7 +113,6 @@ graph2.selectAll("text")
 		.attr("text-anchor", "end")
 		.attr("transform", function(d,i){ return "translate("+(i*w/qpsize+12).toString()+","+(h-(d[2]/qpmax*h)+3).toString()+")rotate(-90)"; })
 		.attr("class", function(d, i){ return "b" + d[0].toString(); });
-
 
 teamp.sort(function(a,b){
 	if (a[1] > pointmax) pointmax = a[1];
