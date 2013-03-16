@@ -5,12 +5,17 @@ import urllib2
 from string import replace
 from bs4 import BeautifulSoup
 import json
+import sys
+
+if len(sys.argv) < 2:
+	print("Not enough args")
+	exit()
 
 teamq = {}
 teamqp = {}
 teamp = {}
 
-page = urllib2.urlopen("http://www2.usfirst.org/2013comp/Events/NHMA/rankings.html")
+page = urllib2.urlopen("http://www2.usfirst.org/2013comp/Events/"+sys.argv[1]+"/rankings.html")
 soup = BeautifulSoup(page.read())
 
 temp = soup.body
@@ -20,11 +25,11 @@ row = temp.find_all('tr')[2]
 while row != None:
 	data = row.contents
 	teamq[unicode(data[3].contents[0])]=[float(unicode(data[5].contents[0])),float(unicode(data[7].contents[0]))]
-	teamqp[unicode(data[3].contents[0])]=[float(), float(unicode(data[5].contents[0])), float(unicode(data[19].contents[0]))]
-	teamp[unicode(data[3].contents[0])]=[float(), float(unicode(data[19].contents[0]))]
+	teamqp[unicode(data[3].contents[0])]=[float(), float(unicode(data[5].contents[0])), float(unicode(data[17].contents[0]))]
+	teamp[unicode(data[3].contents[0])]=[float(), float(unicode(data[17].contents[0]))]
 	row = row.next_sibling.next_sibling
 
-page = urllib2.urlopen("http://www2.usfirst.org/2013comp/Events/NHMA/matchresults.html")
+page = urllib2.urlopen("http://www2.usfirst.org/2013comp/Events/"+sys.argv[1]+"/matchresults.html")
 soup = BeautifulSoup(page.read())
 
 temp = soup.body
@@ -34,7 +39,10 @@ row = temp.find_all('tr')[3]
 
 while row != None:
 	data = row.contents
-	teamqp[unicode(data[5].contents[0])][0] += float(unicode(data[17].contents[0]))
+	try:
+		teamqp[unicode(data[5].contents[0])][0] += float(unicode(data[17].contents[0]))
+	except Exception, e:
+		break
 	teamqp[unicode(data[7].contents[0])][0] += float(unicode(data[17].contents[0]))
 	teamqp[unicode(data[9].contents[0])][0] += float(unicode(data[17].contents[0]))
 	teamqp[unicode(data[11].contents[0])][0] += float(unicode(data[19].contents[0]))
