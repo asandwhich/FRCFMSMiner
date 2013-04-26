@@ -9,7 +9,7 @@ teamq = {}
 teamqp = {}
 teamp = {}
 
-page = urlopen("http://www2.usfirst.org/2013comp/Events/NHMA/rankings.html")
+page = urlopen("http://www2.usfirst.org/2013comp/Events/ARFA/rankings.html")
 soup = BeautifulSoup(page.read())
 
 temp = soup.body
@@ -23,7 +23,7 @@ while row != None:
 	teamp[data[3].contents[0]]=[float(), float(data[19].contents[0])]
 	row = row.next_sibling.next_sibling
 
-page = urlopen("http://www2.usfirst.org/2013comp/Events/NHMA/matchresults.html")
+page = urlopen("http://www2.usfirst.org/2013comp/Events/ARFA/matchresults.html")
 soup = BeautifulSoup(page.read())
 
 temp = soup.body
